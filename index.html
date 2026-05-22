@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulse</title>
+    <link rel="icon" type="image/png" href="assets/logo-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+    <script>
+        (function () {
+            try {
+                var s = JSON.parse(localStorage.getItem('pulse-settings'));
+                if (s && s.darkTheme === false) document.body.classList.add('theme-light');
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
+    <div id="server-hint" class="server-hint" hidden>
+        <strong>Pulse-сервер недоступен.</strong>
+        1) Запустите <code>npm start</code> или <code>СБРОС-И-ЗАПУСК.bat</code>
+        2) Откройте <a id="server-hint-link" href="http://localhost:3000">http://localhost:3000</a>
+        (не Live Server и не двойной клик по index.html).
+    </div>
+
+    <!-- Экран авторизации -->
+    <div id="auth-screen" class="screen active">
+        <button type="button" id="theme-toggle-auth" class="theme-toggle-btn theme-toggle-auth" aria-label="Переключить тему">
+            <i class="fa-solid fa-sun"></i>
+        </button>
+        <div class="auth-container">
+            <div class="auth-header">
+                <img src="assets/logo-icon.png" alt="Pulse" class="auth-logo-icon">
+                <img src="assets/logo-wordmark.png" alt="Pulse" class="auth-logo-wordmark">
+                <p>Общение в реальном времени</p>
+            </div>
+            
+            <div class="auth-form">
+                <div class="form-group">
+                    <input type="text" id="login-username" placeholder="Имя пользователя" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="login-password" placeholder="Пароль" required>
+                </div>
+                <button id="login-btn" class="btn-primary">Войти</button>
+                <button id="show-register" class="btn-secondary">Создать аккаунт</button>
+                <p class="demo-hint">Запуск: <strong>ОТКРЫТЬ-PULSE.bat</strong> → <strong>http://localhost:3000</strong><br>Демо: <strong>demo</strong> / <strong>demo123</strong> · Админ: <strong>admin</strong> / <strong>admin123</strong></p>
+            </div>
+
+            <div class="auth-form register-form" style="display: none;">
+                <div class="form-group">
+                    <input type="text" id="register-username" placeholder="Имя пользователя" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="register-email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="register-password" placeholder="Пароль" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="register-fullname" placeholder="Полное имя" required>
+                </div>
+                <button id="register-btn" class="btn-primary">Создать аккаунт</button>
+                <button id="show-login" class="btn-secondary">Уже есть аккаунт</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной интерфейс -->
+    <div id="main-screen" class="screen">
+        <div class="phone-mockup">
+            <div class="header active" id="header-main">
+                <i class="fa-solid fa-bars icon" id="sidebar-toggle"></i>
+                <h2 class="app-title"><img src="assets/logo-icon.png" alt="" class="header-logo"> Pulse <span id="connection-dot" class="connection-dot offline" title="Проверка соединения..."></span></h2>
+                <div class="header-actions">
+                    <button type="button" id="theme-toggle-main" class="theme-toggle-btn theme-toggle-header" aria-label="Переключить тему">
+                        <i class="fa-solid fa-sun"></i>
+                    </button>
+                    <i class="fa-solid fa-magnifying-glass icon" id="search-toggle"></i>
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <!-- Главный экран -->
+                <div id="screen-main" class="content-container active">
+                    <div class="stories-container" id="stories-list">
+                        <div class="story-item" id="add-story-btn" title="Добавить историю">
+                            <div class="story-ring add">
+                                <div class="story-plus">
+                                    <i class="fa-solid fa-plus"></i>
+                                </div>
+                            </div>
+                            <span class="story-name">История</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-list-tabs">
+                        <div class="chat-list-tab active" data-tab="all">Все</div>
+                        <div class="chat-list-tab" data-tab="personal">Личные</div>
+                        <div class="chat-list-tab" data-tab="groups">Группы</div>
+                    </div>
+                    
+                    <div class="search-input-container" id="search-container" style="display: none;">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" class="search-input" id="chat-search" placeholder="Поиск чатов">
+                        </div>
+                    </div>
+                    
+                    <ul class="chat-list" id="chat-list">
+                        <!-- Чаты будут загружены динамически -->
+                    </ul>
+                </div>
+
+                <!-- Экран чата -->
+                <div id="screen-chat" class="content-container">
+                    <div class="chat-header">
+                        <i class="fa-solid fa-arrow-left icon" id="back-to-chats"></i>
+                        <div class="chat-header-info">
+                            <h3 id="chat-with-name">Имя пользователя</h3>
+                            <span id="chat-status">в сети</span>
+                            <span id="typing-indicator" class="typing-indicator"></span>
+                        </div>
+                        <i class="fa-solid fa-users icon" id="view-group-members" title="Участники группы" style="display:none;"></i>
+                        <i class="fa-solid fa-user-plus icon" id="invite-to-group" title="Пригласить в группу" style="display:none;"></i>
+                        <i class="fa-solid fa-magnifying-glass icon" id="chat-search-toggle" title="Поиск в чате"></i>
+                    </div>
+                    <div class="chat-message-search" id="chat-message-search" style="display: none;">
+                        <input type="text" id="message-search-input" placeholder="Поиск по сообщениям...">
+                    </div>
+                    
+<div class="chat-content" id="chat-messages">
+    <div id="loading-messages" class="loading-indicator">
+        <div class="spinner"></div>
+        <span>Загрузка сообщений...</span>
+    </div>
+</div>
+                    
+<div class="chat-input-container">
+    <i class="fa-solid fa-paperclip icon" id="attach-image" title="Отправить фото"></i>
+    <input type="file" id="chat-image-input" accept="image/*" hidden>
+    <textarea class="chat-input-field" id="message-input" placeholder="Сообщение" rows="1"></textarea>
+    <button id="send-message" class="send-button">
+        <i class="fa-solid fa-paper-plane"></i>
+    </button>
+</div>
+                </div>
+
+                <!-- Контакты -->
+                <div id="screen-contacts" class="content-container">
+                    <div class="chat-header">
+                        <i class="fa-solid fa-arrow-left icon" id="back-from-contacts"></i>
+                        <div class="chat-header-info">
+                            <h3>Контакты</h3>
+                            <span>Все пользователи</span>
+                        </div>
+                    </div>
+                    <div class="search-input-container contacts-search">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" class="search-input" id="contacts-search" placeholder="Поиск по имени или @логину">
+                        </div>
+                    </div>
+                    <ul class="contacts-list" id="contacts-list"></ul>
+                </div>
+
+                <!-- Админ-панель -->
+                <div id="screen-admin" class="content-container">
+                    <div class="chat-header">
+                        <i class="fa-solid fa-arrow-left icon" id="back-from-admin"></i>
+                        <div class="chat-header-info">
+                            <h3>Админ-панель</h3>
+                            <span>Управление системой</span>
+                        </div>
+                    </div>
+                    <div class="admin-panel" id="admin-panel">
+                        <p class="empty-state">Загрузка...</p>
+                    </div>
+                </div>
+
+                <!-- Настройки -->
+                <div id="screen-settings" class="content-container">
+                    <div class="chat-header">
+                        <i class="fa-solid fa-arrow-left icon" id="back-from-settings"></i>
+                        <div class="chat-header-info">
+                            <h3>Настройки</h3>
+                            <span>Параметры приложения</span>
+                        </div>
+                    </div>
+                    <div class="settings-panel">
+                        <label class="settings-toggle">
+                            <span>Тёмная тема</span>
+                            <input type="checkbox" id="setting-dark-theme" checked>
+                        </label>
+                        <label class="settings-toggle">
+                            <span>Звук уведомлений</span>
+                            <input type="checkbox" id="setting-sounds">
+                        </label>
+                        <div class="settings-sound-block">
+                            <p class="settings-sound-title">Свой звук уведомления</p>
+                            <p class="modal-hint" id="custom-sound-name">Сейчас: стандартный сигнал</p>
+                            <input type="file" id="custom-sound-input" accept="audio/mpeg,audio/wav,audio/ogg,audio/*" hidden>
+                            <div class="settings-sound-actions">
+                                <button type="button" class="btn-small" id="pick-custom-sound">Загрузить MP3/WAV</button>
+                                <button type="button" class="btn-small btn-secondary-inline" id="test-custom-sound">Проверить</button>
+                                <button type="button" class="btn-small btn-secondary-inline" id="reset-custom-sound">Сбросить</button>
+                            </div>
+                            <p class="modal-hint">До 1 МБ. Сохраняется в браузере на этом устройстве.</p>
+                        </div>
+                        <label class="settings-toggle">
+                            <span>Отправка по Enter (Shift+Enter — новая строка)</span>
+                            <input type="checkbox" id="setting-enter-send" checked>
+                        </label>
+                        <button id="save-settings" class="btn-primary settings-save">Сохранить</button>
+                    </div>
+                </div>
+
+                <!-- Профиль -->
+                
+<div id="screen-profile" class="content-container">
+    <div class="profile-header">
+        <i class="fa-solid fa-arrow-left icon" id="back-from-profile"></i>
+        <h2>Профиль</h2>
+    </div>
+    
+    <div class="settings-section">
+        <div class="profile-header">
+            <div class="profile-pic avatar-upload" id="profile-avatar" title="Нажмите, чтобы сменить фото">?</div>
+            <input type="file" id="avatar-input" accept="image/*" hidden>
+            <div class="profile-info">
+                <h2 id="profile-fullname">Загрузка...</h2>
+                <p id="profile-status" class="status-online">в сети</p>
+            </div>
+        </div>
+        
+        <ul class="settings-section">
+            <li class="settings-list-item">
+                <div class="profile-list-item-left">
+                    <h4 id="profile-phone">Не указан</h4>
+                    <p>Телефон</p>
+                </div>
+            </li>
+            <li class="settings-list-item">
+                <div class="profile-list-item-left">
+                    <h4 id="profile-username">@username</h4>
+                    <p>Имя пользователя</p>
+                </div>
+            </li>
+            <li class="settings-list-item">
+                <div class="profile-list-item-left">
+                    <h4>О себе</h4>
+                    <p id="profile-bio">Информация отсутствует</p>
+                </div>
+            </li>
+            <li class="settings-list-item" id="edit-profile-btn">
+                <i class="fa-solid fa-pencil icon"></i>
+                <span>Редактировать профиль</span>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="settings-section">
+        <div class="settings-list-item" id="logout-btn">
+            <i class="fa-solid fa-right-from-bracket icon"></i>
+            <span>Выйти</span>
+        </div>
+    </div>
+</div>
+            </div>
+
+            <!-- Боковое меню -->
+            <div id="sidebar" class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-profile-pic" id="sidebar-avatar">ИИ</div>
+                    <div class="profile-info">
+                        <h4 id="sidebar-fullname">Иван Иванов</h4>
+                        <p id="sidebar-username">@alex_nkr</p>
+                    </div>
+                </div>
+                
+                <ul class="sidebar-list">
+                    <li class="sidebar-list-item" id="sidebar-profile">
+                        <i class="fa-regular fa-user icon"></i>
+                        <span>Мой профиль</span>
+                    </li>
+                    <li class="sidebar-list-item" id="create-group">
+                        <i class="fa-solid fa-users icon"></i>
+                        <span>Создать группу</span>
+                    </li>
+                    <li class="sidebar-list-item" id="contacts">
+                        <i class="fa-solid fa-address-book icon"></i>
+                        <span>Контакты</span>
+                    </li>
+                    <li class="sidebar-list-item" id="settings">
+                        <i class="fa-solid fa-cog icon"></i>
+                        <span>Настройки</span>
+                    </li>
+                    <li class="sidebar-list-item admin-only" id="sidebar-admin" style="display:none;">
+                        <i class="fa-solid fa-shield-halved icon"></i>
+                        <span>Админ-панель</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="sidebar-overlay" class="sidebar-overlay"></div>
+        </div>
+    </div>
+
+    <div id="story-modal" class="story-modal">
+        <div id="story-modal-overlay" class="story-modal-overlay"></div>
+        <div class="story-modal-content">
+            <button type="button" id="story-modal-close" class="story-modal-close">&times;</button>
+            <div id="story-modal-body"></div>
+        </div>
+    </div>
+    <input type="file" id="story-image-input" accept="image/*" hidden>
+
+    <div id="app-modal" class="app-modal">
+        <div class="app-modal-overlay" id="app-modal-overlay"></div>
+        <div class="app-modal-box" id="app-modal-content"></div>
+    </div>
+    
+    <script src="api.js"></script>
+    <script>
+        (function () {
+            var hint = document.getElementById('server-hint');
+            var link = document.getElementById('server-hint-link');
+            if (!window.Api) return;
+            if (link) link.href = Api.getBase();
+            if (location.protocol === 'file:' || !Api.isPageOnServer()) {
+                if (hint) hint.hidden = false;
+            }
+            Api.checkHealth().then(function (ok) {
+                if (!ok && hint) hint.hidden = false;
+                if (ok && hint && Api.isPageOnServer()) hint.hidden = true;
+            });
+        })();
+    </script>
+    <script src="theme.js"></script>
+    <script src="notification-sound.js"></script>
+    <script src="avatars.js"></script>
+    <script src="auth.js"></script>
+    <script src="chat.js"></script>
+    <script src="stories.js"></script>
+    <script src="admin.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

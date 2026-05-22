@@ -1,0 +1,113 @@
+{
+  "users": [
+    {
+      "id": "demo-user-id",
+      "username": "demo",
+      "email": "demo@example.com",
+      "password": "$2a$10$.iW5d1Phoc0ZP0TlvRNN2OpOEphpNOv9ZDJGY5HWWQTEs2BjVTTZm",
+      "fullname": "Демо Пользователь",
+      "phone": "+7 (999) 123-45-67",
+      "bio": "Демонстрационный аккаунт",
+      "is_online": 0,
+      "last_seen": "2026-05-22T13:29:10.022Z",
+      "created_at": "2026-05-22T13:28:34.653Z",
+      "role": "user"
+    },
+    {
+      "id": "admin-user-id",
+      "username": "admin",
+      "email": "admin@pulse.local",
+      "password": "$2a$10$w0X93Dr1o9Hqgwep2uQh2.eyag9pgiJoZrGDcAzCHtfMvn810kKAK",
+      "fullname": "Администратор",
+      "phone": "",
+      "bio": "Панель управления",
+      "is_online": 0,
+      "last_seen": "2026-05-22T13:28:59.367Z",
+      "created_at": "2026-05-22T13:28:34.730Z",
+      "role": "admin"
+    }
+  ],
+  "chats": [
+    {
+      "id": "general-chat",
+      "name": "Общий чат",
+      "type": "group",
+      "created_by": "system",
+      "created_at": "2026-05-22T13:28:34.730Z"
+    },
+    {
+      "id": "support-demo-user-id",
+      "name": "Техподдержка Pulse",
+      "type": "private",
+      "created_by": "system",
+      "created_at": "2026-05-22T13:28:34.730Z"
+    },
+    {
+      "id": "support-admin-user-id",
+      "name": "Техподдержка Pulse",
+      "type": "private",
+      "created_by": "system",
+      "created_at": "2026-05-22T13:28:34.730Z"
+    }
+  ],
+  "participants": [
+    {
+      "chat_id": "general-chat",
+      "user_id": "demo-user-id"
+    },
+    {
+      "chat_id": "general-chat",
+      "user_id": "admin-user-id"
+    },
+    {
+      "chat_id": "support-demo-user-id",
+      "user_id": "demo-user-id"
+    },
+    {
+      "chat_id": "support-admin-user-id",
+      "user_id": "admin-user-id"
+    }
+  ],
+  "messages": [
+    {
+      "id": "1779456514730welcome",
+      "chat_id": "general-chat",
+      "sender_id": "system",
+      "text": "Добро пожаловать в Pulse!",
+      "timestamp": "2026-05-22T13:28:34.730Z",
+      "message_type": "text",
+      "read_by": [
+        "admin-user-id",
+        "demo-user-id"
+      ]
+    },
+    {
+      "id": "1779456514730support1",
+      "chat_id": "support-demo-user-id",
+      "sender_id": "support",
+      "text": "Здравствуйте! Чем могу помочь?",
+      "timestamp": "2026-05-22T13:28:34.730Z",
+      "message_type": "text",
+      "read_by": []
+    },
+    {
+      "id": "1779456514730support2",
+      "chat_id": "support-admin-user-id",
+      "sender_id": "support",
+      "text": "Здравствуйте! Чем могу помочь?",
+      "timestamp": "2026-05-22T13:28:34.730Z",
+      "message_type": "text",
+      "read_by": []
+    }
+  ],
+  "stories": [
+    {
+      "id": "1779461184047xxuvpgvqr",
+      "user_id": "admin-user-id",
+      "text": "Крутой",
+      "has_image": true,
+      "created_at": "2026-05-22T14:46:24.047Z",
+      "expires_at": "2026-05-23T14:46:24.047Z"
+    }
+  ]
+}
